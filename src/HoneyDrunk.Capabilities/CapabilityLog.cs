@@ -19,4 +19,10 @@ internal static partial class CapabilityLog
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "Capability {CapabilityKey} handler failed with {ExceptionType}")]
     public static partial void HandlerFailed(ILogger logger, string capabilityKey, string exceptionType);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Capability {CapabilityKey} guard failed with {ExceptionType}; the call is denied")]
+    public static partial void GuardFailed(ILogger logger, string capabilityKey, string exceptionType);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Authorization policy failed for capability {CapabilityKey} with {ExceptionType}; the call is denied")]
+    public static partial void PolicyFailed(ILogger logger, string capabilityKey, string exceptionType);
 }

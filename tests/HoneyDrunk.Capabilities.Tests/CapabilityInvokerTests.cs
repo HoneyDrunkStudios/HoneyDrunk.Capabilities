@@ -118,6 +118,43 @@ public sealed class CapabilityInvokerTests
         this.AssertNowhere("sk-secret-value");
     }
 
+    /// <summary>A guard exception is a guard_error denial; the handler never runs and the message reaches no result, log or tag.</summary>
+    /// <returns>A task.</returns>
+    [Fact]
+    public async Task Guard_exception_is_denied_without_its_message()
+    {
+        var handler = CountingHandler.Returning(CapabilityResult.Success(null));
+        this.registry.Register(Descriptor(), handler);
+        var guard = new CountingGuard((_, _, _) => Task.FromException<CapabilityGuardDecision>(new InvalidOperationException("approval store sk-secret-value down")));
+
+        var result = await this.Invoker(guard).InvokeAsync(Invocation());
+
+        Assert.Equal(CapabilityResultStatus.Denied, result.Status);
+        Assert.Equal(["guard_error"], result.DenyCodes);
+        Assert.Equal(0, handler.Calls);
+        Assert.DoesNotContain("sk-secret-value", result.ToString(), StringComparison.Ordinal);
+        var entry = Assert.Single(this.logger.Entries);
+        Assert.Contains("System.InvalidOperationException", entry.message, StringComparison.Ordinal);
+        Assert.Contains("test-tool@1.0.0", entry.message, StringComparison.Ordinal);
+        Assert.Null(entry.exception);
+        Assert.Contains(this.telemetry.Tags, tag => tag.Key == "capability.status" && Equals(tag.Value, "denied"));
+        Assert.Contains(this.telemetry.Tags, tag => tag.Key == "capability.deny_code" && Equals(tag.Value, "guard_error"));
+        this.AssertNowhere("sk-secret-value");
+    }
+
+    /// <summary>A guard denial with no codes is reported with guard_error.</summary>
+    /// <returns>A task.</returns>
+    [Fact]
+    public async Task Denial_without_codes_carries_guard_error()
+    {
+        this.registry.Register(Descriptor(), CountingHandler.Returning(CapabilityResult.Success(null)));
+
+        var result = await this.Invoker(CountingGuard.Denying()).InvokeAsync(Invocation());
+
+        Assert.Equal(CapabilityResultStatus.Denied, result.Status);
+        Assert.Equal(["guard_error"], result.DenyCodes);
+    }
+
     /// <summary>Arguments reach neither telemetry nor logs, and only allowlisted tags are set.</summary>
     /// <returns>A task.</returns>
     [Fact]

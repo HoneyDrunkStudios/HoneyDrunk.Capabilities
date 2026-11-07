@@ -1,5 +1,6 @@
 using HoneyDrunk.Auth.Abstractions;
 using HoneyDrunk.Capabilities.Abstractions;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Xunit;
 
@@ -18,13 +19,14 @@ public sealed class AuthPolicyCapabilityGuardTests
         new CapabilityPermissions(["test.invoke", "test.read"], ["test-operator", "test-admin"]));
 
     private readonly FakeAuthorizationPolicy policy = new();
+    private readonly ListLogger<AuthPolicyCapabilityGuard> logger = new();
 
     /// <summary>The caller becomes an identity with its subject, the configured scheme and scope and role claims.</summary>
     /// <returns>A task.</returns>
     [Fact]
     public async Task Maps_caller_to_identity_claims()
     {
-        var guard = new AuthPolicyCapabilityGuard(this.policy, Options.Create(new CapabilityGuardOptions { IdentityScheme = "test-scheme" }));
+        var guard = new AuthPolicyCapabilityGuard(this.policy, Options.Create(new CapabilityGuardOptions { IdentityScheme = "test-scheme" }), this.logger);
 
         await guard.AuthorizeAsync(Descriptor, new CapabilityCaller("test-caller", ["test.invoke", "test.read"], ["test-operator"]));
 
@@ -94,12 +96,31 @@ public sealed class AuthPolicyCapabilityGuardTests
         Assert.Equal(["MissingScope", "MissingRole"], decision.DenyCodes);
     }
 
-    /// <summary>A policy that throws denies with guard_error (fail closed).</summary>
+    /// <summary>A policy that throws denies with guard_error (fail closed) and logs the exception type, not its message.</summary>
     /// <returns>A task.</returns>
     [Fact]
     public async Task Policy_exception_fails_closed()
     {
         this.policy.Error = new InvalidOperationException("policy store sk-secret-value unavailable");
+
+        var decision = await this.Guard().AuthorizeAsync(Descriptor, new CapabilityCaller("test-caller", [], []));
+
+        Assert.False(decision.IsAllowed);
+        Assert.Equal(["guard_error"], decision.DenyCodes);
+        var entry = Assert.Single(this.logger.Entries);
+        Assert.Equal(LogLevel.Warning, entry.level);
+        Assert.Contains("System.InvalidOperationException", entry.message, StringComparison.Ordinal);
+        Assert.Contains("test-tool@1.2.3", entry.message, StringComparison.Ordinal);
+        Assert.Null(entry.exception);
+        Assert.DoesNotContain("sk-secret-value", entry.message, StringComparison.Ordinal);
+    }
+
+    /// <summary>An Auth denial with no reasons still carries a code: guard_error.</summary>
+    /// <returns>A task.</returns>
+    [Fact]
+    public async Task Deny_without_reasons_carries_guard_error()
+    {
+        this.policy.Decision = AuthorizationDecision.Deny([]);
 
         var decision = await this.Guard().AuthorizeAsync(Descriptor, new CapabilityCaller("test-caller", [], []));
 
@@ -135,8 +156,8 @@ public sealed class AuthPolicyCapabilityGuardTests
     [Fact]
     public void Blank_scheme_is_rejected()
     {
-        Assert.ThrowsAny<ArgumentException>(() => new AuthPolicyCapabilityGuard(this.policy, Options.Create(new CapabilityGuardOptions { IdentityScheme = " " })));
+        Assert.ThrowsAny<ArgumentException>(() => new AuthPolicyCapabilityGuard(this.policy, Options.Create(new CapabilityGuardOptions { IdentityScheme = " " }), this.logger));
     }
 
-    private AuthPolicyCapabilityGuard Guard() => new(this.policy, Options.Create(new CapabilityGuardOptions()));
+    private AuthPolicyCapabilityGuard Guard() => new(this.policy, Options.Create(new CapabilityGuardOptions()), this.logger);
 }

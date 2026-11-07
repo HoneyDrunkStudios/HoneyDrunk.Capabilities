@@ -33,7 +33,7 @@ The registry key is `(Name, Version)`, written `name@version`. Lookup is exact: 
 `ICapabilityInvoker` is the only way to run a capability; the registry never hands out a handler. For each call it:
 
 1. Resolves the exact key. A miss returns `NotFound` without asking the guard.
-2. Asks the guard exactly once. A denial returns `Denied` with the deny codes, and the handler does not run.
+2. Asks the guard exactly once. A denial returns `Denied` with the deny codes, and the handler does not run. A guard that throws, or denies without a code, gives `Denied` with `guard_error`; only the exception type name and the key are logged.
 3. Runs the handler and returns its result. A handler exception returns `Failed` with `handler_error` and a fixed message; only the exception type name and the key are logged. The caller's cancellation propagates as `OperationCanceledException`.
 
 Arguments, output and exception messages never reach logs, traces or result messages. Activities are `capabilities.resolve` and `capabilities.invoke`, through Kernel's `ITelemetryActivityFactory`, with only the tags `capability.name`, `capability.version`, `capability.status` and `capability.deny_code`.
@@ -53,7 +53,7 @@ Result error codes are `not_found`, `denied`, `invalid_arguments` and `handler_e
 | the descriptor's key | resource `capability/{name}/{version}` |
 | `CapabilityPermissions.RequiredScopes` and `RequiredRoles` | `AuthorizationRequest.RequiredScopes` and `RequiredRoles` |
 
-With Auth's default policy, every required scope must be held and any one required role is enough. Deny codes are Auth's `AuthorizationDenyCode` names (for example `MissingScope`); a policy that throws denies with `guard_error`. The caller is asserted by the host composition, not by a validated token, so the trust boundary is the host process.
+With Auth's default policy, every required scope must be held and any one required role is enough. Deny codes are Auth's `AuthorizationDenyCode` names (for example `MissingScope`); a policy that throws, or a denial with no reasons, denies with `guard_error`, and a policy failure is logged with its exception type name and the key only. The caller is asserted by the host composition, not by a validated token, so the trust boundary is the host process.
 
 ## Registering a capability
 
@@ -81,7 +81,13 @@ services.AddCapability<EchoHandler>(new CapabilityDescriptor(
     new CapabilityPermissions(["example.echo"], [])));
 ```
 
-The registry is a singleton that registers every declared capability when it is first resolved, so a duplicate key fails at startup. Handlers are singletons. The invoker and the guard are scoped, because Kernel's telemetry factory is scoped:
+The registry is a singleton that registers every declared capability when it is first resolved, so a duplicate key throws `InvalidOperationException` on that first resolve, not when the container is built. To fail during startup, resolve the registry once while the host starts:
+
+```csharp
+_ = provider.GetRequiredService<ICapabilityRegistry>();
+```
+
+Handlers are singletons. The invoker and the guard are scoped, because Kernel's telemetry factory is scoped:
 
 ```csharp
 using var scope = provider.CreateScope();

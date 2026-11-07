@@ -1,5 +1,6 @@
 using HoneyDrunk.Auth.Abstractions;
 using HoneyDrunk.Capabilities.Abstractions;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace HoneyDrunk.Capabilities;
@@ -7,7 +8,7 @@ namespace HoneyDrunk.Capabilities;
 /// <summary>
 /// The default guard: it projects the caller and the descriptor into Auth's types and lets the host's
 /// <see cref="IAuthorizationPolicy"/> decide (ADR-0017 D5 and D10, Grid invariant 129). It keeps no permission
-/// model of its own. A policy failure denies with <c>guard_error</c>.
+/// model of its own. A policy failure denies with <c>guard_error</c> and logs only the exception type name and the key.
 /// </summary>
 public sealed class AuthPolicyCapabilityGuard : ICapabilityGuard
 {
@@ -17,14 +18,17 @@ public sealed class AuthPolicyCapabilityGuard : ICapabilityGuard
 
     private readonly IAuthorizationPolicy policy;
     private readonly string identityScheme;
+    private readonly ILogger logger;
 
     /// <summary>Initializes a new instance of the <see cref="AuthPolicyCapabilityGuard"/> class.</summary>
     /// <param name="policy">The Auth policy the host composed.</param>
     /// <param name="options">The guard options.</param>
-    public AuthPolicyCapabilityGuard(IAuthorizationPolicy policy, IOptions<CapabilityGuardOptions> options)
+    /// <param name="logger">The logger.</param>
+    public AuthPolicyCapabilityGuard(IAuthorizationPolicy policy, IOptions<CapabilityGuardOptions> options, ILogger<AuthPolicyCapabilityGuard> logger)
     {
         ArgumentNullException.ThrowIfNull(policy);
         ArgumentNullException.ThrowIfNull(options);
+        ArgumentNullException.ThrowIfNull(logger);
         var scheme = options.Value?.IdentityScheme;
         if (string.IsNullOrWhiteSpace(scheme))
         {
@@ -33,6 +37,7 @@ public sealed class AuthPolicyCapabilityGuard : ICapabilityGuard
 
         this.policy = policy;
         this.identityScheme = scheme;
+        this.logger = logger;
     }
 
     /// <inheritdoc />
@@ -57,8 +62,9 @@ public sealed class AuthPolicyCapabilityGuard : ICapabilityGuard
         {
             throw;
         }
-        catch (Exception)
+        catch (Exception error)
         {
+            CapabilityLog.PolicyFailed(this.logger, descriptor.Key.ToString(), error.GetType().FullName ?? error.GetType().Name);
             return CapabilityGuardDecision.Deny([GuardErrorCode]);
         }
 
@@ -67,9 +73,13 @@ public sealed class AuthPolicyCapabilityGuard : ICapabilityGuard
             return CapabilityGuardDecision.Deny([GuardErrorCode]);
         }
 
-        return decision.IsAllowed
-            ? CapabilityGuardDecision.Allow()
-            : CapabilityGuardDecision.Deny([.. decision.DenyReasons.Select(reason => reason.Code.ToString()).Distinct(StringComparer.Ordinal)]);
+        if (decision.IsAllowed)
+        {
+            return CapabilityGuardDecision.Allow();
+        }
+
+        string[] codes = [.. decision.DenyReasons.Select(reason => reason.Code.ToString()).Distinct(StringComparer.Ordinal)];
+        return CapabilityGuardDecision.Deny(codes.Length > 0 ? codes : [GuardErrorCode]);
     }
 
     private static Dictionary<string, IReadOnlyList<string>> Claims(CapabilityCaller caller)

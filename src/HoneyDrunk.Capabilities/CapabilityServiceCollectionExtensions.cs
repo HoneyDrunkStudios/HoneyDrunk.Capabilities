@@ -35,7 +35,8 @@ public static class CapabilityServiceCollectionExtensions
 
     /// <summary>
     /// Declares a capability and its handler. The handler is a singleton. The registry registers every declared
-    /// capability when it is first resolved, so a duplicate key fails at startup.
+    /// capability when it is first resolved, so a duplicate key throws <see cref="InvalidOperationException"/> on that
+    /// first resolve. Resolve <see cref="ICapabilityRegistry"/> once while the host starts to surface it then.
     /// </summary>
     /// <typeparam name="THandler">The handler type, implemented by the owning node.</typeparam>
     /// <param name="services">The service collection.</param>

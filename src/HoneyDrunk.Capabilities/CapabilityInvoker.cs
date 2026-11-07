@@ -6,8 +6,9 @@ namespace HoneyDrunk.Capabilities;
 
 /// <summary>
 /// Runs capabilities: resolves the exact key, asks the guard exactly once, then dispatches to the handler. A miss
-/// never reaches the guard and a denial never reaches the handler. Handler failures become a fixed
-/// <c>handler_error</c> result; only the exception type name and the key are logged.
+/// never reaches the guard and a denial never reaches the handler. A guard exception is a <c>guard_error</c>
+/// denial and a handler exception is a fixed <c>handler_error</c> result; in both cases only the exception type
+/// name and the key are logged. Only the caller's cancellation propagates.
 /// </summary>
 /// <param name="registry">The registry that holds the handlers.</param>
 /// <param name="guard">The authorization guard.</param>
@@ -50,10 +51,26 @@ public sealed class CapabilityInvoker(
         }
 
         using var invoke = this.telemetry.Start(CapabilityTelemetry.InvokeActivity, CapabilityTelemetry.KeyTags(key));
-        var decision = await this.guard.AuthorizeAsync(descriptor, invocation.Caller, cancellationToken).ConfigureAwait(false);
+        CapabilityGuardDecision? decision;
+        try
+        {
+            decision = await this.guard.AuthorizeAsync(descriptor, invocation.Caller, cancellationToken).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch (Exception error)
+        {
+            CapabilityLog.GuardFailed(this.logger, key.ToString(), error.GetType().FullName ?? error.GetType().Name);
+            CapabilityTelemetry.SetStatus(invoke, CapabilityResultStatus.Denied);
+            CapabilityTelemetry.SetDenyCodes(invoke, GuardErrorCode);
+            return CapabilityResult.Denied([GuardErrorCode]);
+        }
+
         if (decision is not { IsAllowed: true })
         {
-            IReadOnlyList<string> denyCodes = decision?.DenyCodes ?? [GuardErrorCode];
+            IReadOnlyList<string> denyCodes = decision is { DenyCodes.Count: > 0 } ? decision.DenyCodes : [GuardErrorCode];
             var joined = string.Join(',', denyCodes);
             CapabilityTelemetry.SetStatus(invoke, CapabilityResultStatus.Denied);
             CapabilityTelemetry.SetDenyCodes(invoke, joined);

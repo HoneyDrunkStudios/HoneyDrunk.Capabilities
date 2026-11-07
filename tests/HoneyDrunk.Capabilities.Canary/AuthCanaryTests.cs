@@ -33,7 +33,7 @@ public sealed class AuthCanaryTests
         registry.Register(
             new CapabilityDescriptor("test-tool", "1.0.0", "A test capability.", "test-node", """{"type":"object"}""", null, new CapabilityPermissions(["test.invoke"], [])),
             this.handler);
-        var guard = new AuthPolicyCapabilityGuard(policy, Options.Create(new CapabilityGuardOptions()));
+        var guard = new AuthPolicyCapabilityGuard(policy, Options.Create(new CapabilityGuardOptions()), NullLogger<AuthPolicyCapabilityGuard>.Instance);
         this.invoker = new CapabilityInvoker(registry, guard, telemetry, NullLogger<CapabilityInvoker>.Instance);
     }
 
