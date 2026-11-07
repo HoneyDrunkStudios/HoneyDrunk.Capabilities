@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [0.1.0] - 2026-11-07
 
 ### Added
 
@@ -11,3 +11,5 @@
 - `AuthPolicyCapabilityGuard` and `CapabilityGuardOptions`: the default guard maps the caller to an Auth `AuthenticatedIdentity` and the descriptor to an `AuthorizationRequest` (`capability.invoke` on `capability/{name}/{version}`), lets `IAuthorizationPolicy` decide, and fails closed with `guard_error` (ADR-0017 D5, D10; Grid invariant 129).
 - `AddHoneyDrunkCapabilities` and `AddCapability<THandler>`: the registry is a singleton that registers every declared capability on first resolve; the invoker and guard are scoped; the host composes `IAuthorizationPolicy`.
 - `HoneyDrunk.Capabilities.Testing`: `CapabilityTestHarness` over the real registry and invoker, `ScriptedCapabilityGuard` (`AllowAll`, `DenyAll`, `RequireScopes`), `RecordingCapabilityHandler`, `NullTelemetryActivityFactory` and `CapabilityFixtures`.
+- An Auth canary test runs the invoker and guard against the real HoneyDrunk.Auth `DefaultAuthorizationPolicy`.
+- The publish workflow releases `HoneyDrunk.Capabilities.Abstractions`, `HoneyDrunk.Capabilities` and `HoneyDrunk.Capabilities.Testing`.
