@@ -5,3 +5,4 @@
 ### Added
 
 - `InProcessCapabilityRegistry` and `CapabilityInvoker`: resolve by exact key, guard once, then dispatch.
+- `AuthPolicyCapabilityGuard`: authorization through HoneyDrunk.Auth policy, failing closed.
