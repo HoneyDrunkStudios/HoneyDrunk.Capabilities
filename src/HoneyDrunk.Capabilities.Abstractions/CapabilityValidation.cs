@@ -66,6 +66,13 @@ internal static class CapabilityValidation
         return value;
     }
 
+    /// <summary>Checks a required, non-blank text value.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="parameterName">The parameter to name in the exception.</param>
+    /// <returns>The checked value.</returns>
+    public static string NonBlank(string value, string parameterName) =>
+        string.IsNullOrWhiteSpace(value) ? throw new ArgumentException("The value must not be blank.", parameterName) : value;
+
     /// <summary>Checks a description (1 to 1024 characters).</summary>
     /// <param name="description">The description.</param>
     /// <param name="parameterName">The parameter to name in the exception.</param>
