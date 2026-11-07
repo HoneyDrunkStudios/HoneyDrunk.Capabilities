@@ -56,11 +56,7 @@ public sealed class CapabilityInvoker(
         {
             decision = await this.guard.AuthorizeAsync(descriptor, invocation.Caller, cancellationToken).ConfigureAwait(false);
         }
-        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
-        {
-            throw;
-        }
-        catch (Exception error)
+        catch (Exception error) when (!(error is OperationCanceledException && cancellationToken.IsCancellationRequested))
         {
             CapabilityLog.GuardFailed(this.logger, key.ToString(), error.GetType().FullName ?? error.GetType().Name);
             CapabilityTelemetry.SetStatus(invoke, CapabilityResultStatus.Denied);
@@ -83,11 +79,7 @@ public sealed class CapabilityInvoker(
         {
             result = await handler.HandleAsync(invocation, cancellationToken).ConfigureAwait(false);
         }
-        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
-        {
-            throw;
-        }
-        catch (Exception error)
+        catch (Exception error) when (!(error is OperationCanceledException && cancellationToken.IsCancellationRequested))
         {
             CapabilityLog.HandlerFailed(this.logger, key.ToString(), error.GetType().FullName ?? error.GetType().Name);
             result = null;

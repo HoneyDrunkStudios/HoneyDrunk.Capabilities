@@ -166,28 +166,19 @@ internal static class ContractShapeRenderer
             }
         }
 
-        foreach (var constructor in type.GetConstructors(Declared))
+        foreach (var constructor in type.GetConstructors(Declared).Where(constructor => IsVisible(constructor) && !IsCompilerGenerated(constructor)))
         {
-            if (IsVisible(constructor) && !IsCompilerGenerated(constructor))
-            {
-                yield return constructor;
-            }
+            yield return constructor;
         }
 
-        foreach (var method in type.GetMethods(Declared))
+        foreach (var method in type.GetMethods(Declared).Where(method => IsVisible(method) && !accessors.Contains(method) && !IsCompilerGenerated(method)))
         {
-            if (IsVisible(method) && !accessors.Contains(method) && !IsCompilerGenerated(method))
-            {
-                yield return method;
-            }
+            yield return method;
         }
 
-        foreach (var field in type.GetFields(Declared))
+        foreach (var field in type.GetFields(Declared).Where(field => (field.IsPublic || field.IsFamily || field.IsFamilyOrAssembly) && !field.IsSpecialName && !IsCompilerGenerated(field)))
         {
-            if ((field.IsPublic || field.IsFamily || field.IsFamilyOrAssembly) && !field.IsSpecialName && !IsCompilerGenerated(field))
-            {
-                yield return field;
-            }
+            yield return field;
         }
     }
 

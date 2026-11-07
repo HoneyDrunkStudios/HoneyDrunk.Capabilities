@@ -116,7 +116,7 @@ public sealed class ContractShapeRendererTests
     [Fact]
     public void Verify_fails_without_a_baseline()
     {
-        var path = Path.Combine(Path.GetTempPath(), $"contract-shape-{Guid.NewGuid():N}.txt");
+        var path = Path.Join(Path.GetTempPath(), $"contract-shape-{Guid.NewGuid():N}.txt");
 
         var (passed, message) = ContractShapeCheck.Verify(Shape("A x"), path, "0.1.0", updateRequested: false);
 
@@ -158,7 +158,7 @@ public sealed class ContractShapeRendererTests
     {
         public TempBaseline(string? shape, string? version)
         {
-            this.Path = System.IO.Path.Combine(System.IO.Path.GetTempPath(), $"contract-shape-{Guid.NewGuid():N}.txt");
+            this.Path = System.IO.Path.Join(System.IO.Path.GetTempPath(), $"contract-shape-{Guid.NewGuid():N}.txt");
             if (shape is not null && version is not null)
             {
                 var lines = Lines(shape);

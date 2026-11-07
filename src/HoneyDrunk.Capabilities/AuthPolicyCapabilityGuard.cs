@@ -58,11 +58,7 @@ public sealed class AuthPolicyCapabilityGuard : ICapabilityGuard
         {
             decision = await this.policy.EvaluateAsync(identity, request, cancellationToken).ConfigureAwait(false);
         }
-        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
-        {
-            throw;
-        }
-        catch (Exception error)
+        catch (Exception error) when (!(error is OperationCanceledException && cancellationToken.IsCancellationRequested))
         {
             CapabilityLog.PolicyFailed(this.logger, descriptor.Key.ToString(), error.GetType().FullName ?? error.GetType().Name);
             return CapabilityGuardDecision.Deny([GuardErrorCode]);

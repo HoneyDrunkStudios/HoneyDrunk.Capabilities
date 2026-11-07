@@ -21,7 +21,7 @@ public sealed class ContractShapeTests
     {
         Type[] roots = [typeof(ICapabilityRegistry), typeof(CapabilityDescriptor), typeof(ICapabilityInvoker), typeof(ICapabilityGuard)];
         var shape = ContractShapeRenderer.Render(roots);
-        var baseline = Path.Combine(FindRepositoryRoot(), "api", BaselineFile);
+        var baseline = Path.Join(FindRepositoryRoot(), "api", BaselineFile);
         var version = typeof(ICapabilityRegistry).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()!.InformationalVersion;
         var update = Environment.GetEnvironmentVariable(UpdateVariable) == "1";
 
