@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Description>Test fixtures for HoneyDrunk Grid capabilities: a harness over the real registry and invoker, a scripted guard, a recording handler and descriptor fixtures. For test projects only.</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\HoneyDrunk.Capabilities\HoneyDrunk.Capabilities.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="HoneyDrunk.Standards" Version="0.4.4" PrivateAssets="all" />
+  </ItemGroup>
+</Project>
