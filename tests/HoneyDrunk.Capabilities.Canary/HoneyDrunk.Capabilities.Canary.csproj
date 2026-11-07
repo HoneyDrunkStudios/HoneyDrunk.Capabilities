@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><IsPackable>false</IsPackable></PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\HoneyDrunk.Capabilities\HoneyDrunk.Capabilities.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="HoneyDrunk.Standards" Version="0.4.4" PrivateAssets="all" />
+    <PackageReference Include="HoneyDrunk.Standards.Tests" Version="0.4.4" PrivateAssets="all" />
+    <PackageReference Include="HoneyDrunk.Auth" Version="0.6.2" />
+    <PackageReference Include="HoneyDrunk.Audit.Abstractions" Version="0.2.2" />
+  </ItemGroup>
+</Project>

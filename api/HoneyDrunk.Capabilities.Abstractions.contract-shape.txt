@@ -1,0 +1,66 @@
+# package: HoneyDrunk.Capabilities.Abstractions
+# version: 0.1.0
+# roots: HoneyDrunk.Capabilities.Abstractions.CapabilityDescriptor, HoneyDrunk.Capabilities.Abstractions.ICapabilityGuard, HoneyDrunk.Capabilities.Abstractions.ICapabilityInvoker, HoneyDrunk.Capabilities.Abstractions.ICapabilityRegistry
+HoneyDrunk.Capabilities.Abstractions.CapabilityCaller = sealed record class : System.IEquatable<HoneyDrunk.Capabilities.Abstractions.CapabilityCaller>
+HoneyDrunk.Capabilities.Abstractions.CapabilityCaller ctor(System.String SubjectId, System.Collections.Generic.IReadOnlyList<System.String> Scopes, System.Collections.Generic.IReadOnlyList<System.String> Roles)
+HoneyDrunk.Capabilities.Abstractions.CapabilityCaller property: System.Collections.Generic.IReadOnlyList<System.String> Roles { get; }
+HoneyDrunk.Capabilities.Abstractions.CapabilityCaller property: System.Collections.Generic.IReadOnlyList<System.String> Scopes { get; }
+HoneyDrunk.Capabilities.Abstractions.CapabilityCaller property: System.String SubjectId { get; }
+HoneyDrunk.Capabilities.Abstractions.CapabilityDescriptor = sealed record class : System.IEquatable<HoneyDrunk.Capabilities.Abstractions.CapabilityDescriptor>
+HoneyDrunk.Capabilities.Abstractions.CapabilityDescriptor ctor(System.String Name, System.String Version, System.String Description, System.String OwningNode, System.String ParameterSchema, System.String? ReturnSchema, HoneyDrunk.Capabilities.Abstractions.CapabilityPermissions Permissions)
+HoneyDrunk.Capabilities.Abstractions.CapabilityDescriptor property: HoneyDrunk.Capabilities.Abstractions.CapabilityKey Key { get; }
+HoneyDrunk.Capabilities.Abstractions.CapabilityDescriptor property: HoneyDrunk.Capabilities.Abstractions.CapabilityPermissions Permissions { get; }
+HoneyDrunk.Capabilities.Abstractions.CapabilityDescriptor property: System.String Description { get; }
+HoneyDrunk.Capabilities.Abstractions.CapabilityDescriptor property: System.String Name { get; }
+HoneyDrunk.Capabilities.Abstractions.CapabilityDescriptor property: System.String OwningNode { get; }
+HoneyDrunk.Capabilities.Abstractions.CapabilityDescriptor property: System.String ParameterSchema { get; }
+HoneyDrunk.Capabilities.Abstractions.CapabilityDescriptor property: System.String Version { get; }
+HoneyDrunk.Capabilities.Abstractions.CapabilityDescriptor property: System.String? ReturnSchema { get; }
+HoneyDrunk.Capabilities.Abstractions.CapabilityGuardDecision = sealed record class : System.IEquatable<HoneyDrunk.Capabilities.Abstractions.CapabilityGuardDecision>
+HoneyDrunk.Capabilities.Abstractions.CapabilityGuardDecision ctor(System.Boolean IsAllowed, System.Collections.Generic.IReadOnlyList<System.String> DenyCodes)
+HoneyDrunk.Capabilities.Abstractions.CapabilityGuardDecision method: static HoneyDrunk.Capabilities.Abstractions.CapabilityGuardDecision Allow()
+HoneyDrunk.Capabilities.Abstractions.CapabilityGuardDecision method: static HoneyDrunk.Capabilities.Abstractions.CapabilityGuardDecision Deny(System.Collections.Generic.IReadOnlyList<System.String> codes)
+HoneyDrunk.Capabilities.Abstractions.CapabilityGuardDecision property: System.Boolean IsAllowed { get; init; }
+HoneyDrunk.Capabilities.Abstractions.CapabilityGuardDecision property: System.Collections.Generic.IReadOnlyList<System.String> DenyCodes { get; }
+HoneyDrunk.Capabilities.Abstractions.CapabilityInvocation = sealed record class : System.IEquatable<HoneyDrunk.Capabilities.Abstractions.CapabilityInvocation>
+HoneyDrunk.Capabilities.Abstractions.CapabilityInvocation ctor(HoneyDrunk.Capabilities.Abstractions.CapabilityKey Key, System.Text.Json.JsonElement Arguments, HoneyDrunk.Capabilities.Abstractions.CapabilityCaller Caller)
+HoneyDrunk.Capabilities.Abstractions.CapabilityInvocation property: HoneyDrunk.Capabilities.Abstractions.CapabilityCaller Caller { get; }
+HoneyDrunk.Capabilities.Abstractions.CapabilityInvocation property: HoneyDrunk.Capabilities.Abstractions.CapabilityKey Key { get; }
+HoneyDrunk.Capabilities.Abstractions.CapabilityInvocation property: System.Text.Json.JsonElement Arguments { get; }
+HoneyDrunk.Capabilities.Abstractions.CapabilityKey = readonly record struct : System.IEquatable<HoneyDrunk.Capabilities.Abstractions.CapabilityKey>
+HoneyDrunk.Capabilities.Abstractions.CapabilityKey ctor(System.String Name, System.String Version)
+HoneyDrunk.Capabilities.Abstractions.CapabilityKey method: System.String ToString()
+HoneyDrunk.Capabilities.Abstractions.CapabilityKey property: System.String Name { get; }
+HoneyDrunk.Capabilities.Abstractions.CapabilityKey property: System.String Version { get; }
+HoneyDrunk.Capabilities.Abstractions.CapabilityPermissions = sealed record class : System.IEquatable<HoneyDrunk.Capabilities.Abstractions.CapabilityPermissions>
+HoneyDrunk.Capabilities.Abstractions.CapabilityPermissions ctor(System.Collections.Generic.IReadOnlyList<System.String> RequiredScopes, System.Collections.Generic.IReadOnlyList<System.String> RequiredRoles)
+HoneyDrunk.Capabilities.Abstractions.CapabilityPermissions property: System.Collections.Generic.IReadOnlyList<System.String> RequiredRoles { get; }
+HoneyDrunk.Capabilities.Abstractions.CapabilityPermissions property: System.Collections.Generic.IReadOnlyList<System.String> RequiredScopes { get; }
+HoneyDrunk.Capabilities.Abstractions.CapabilityResult = sealed record class : System.IEquatable<HoneyDrunk.Capabilities.Abstractions.CapabilityResult>
+HoneyDrunk.Capabilities.Abstractions.CapabilityResult ctor(HoneyDrunk.Capabilities.Abstractions.CapabilityResultStatus Status, System.Text.Json.JsonElement? Output, System.String? ErrorCode, System.String? ErrorMessage)
+HoneyDrunk.Capabilities.Abstractions.CapabilityResult method: static HoneyDrunk.Capabilities.Abstractions.CapabilityResult Denied(System.Collections.Generic.IReadOnlyList<System.String> denyCodes)
+HoneyDrunk.Capabilities.Abstractions.CapabilityResult method: static HoneyDrunk.Capabilities.Abstractions.CapabilityResult Failed(System.String errorCode, System.String message)
+HoneyDrunk.Capabilities.Abstractions.CapabilityResult method: static HoneyDrunk.Capabilities.Abstractions.CapabilityResult InvalidArguments(System.String message)
+HoneyDrunk.Capabilities.Abstractions.CapabilityResult method: static HoneyDrunk.Capabilities.Abstractions.CapabilityResult NotFound(HoneyDrunk.Capabilities.Abstractions.CapabilityKey key)
+HoneyDrunk.Capabilities.Abstractions.CapabilityResult method: static HoneyDrunk.Capabilities.Abstractions.CapabilityResult Success(System.Text.Json.JsonElement? output)
+HoneyDrunk.Capabilities.Abstractions.CapabilityResult property: HoneyDrunk.Capabilities.Abstractions.CapabilityResultStatus Status { get; init; }
+HoneyDrunk.Capabilities.Abstractions.CapabilityResult property: System.Collections.Generic.IReadOnlyList<System.String> DenyCodes { get; }
+HoneyDrunk.Capabilities.Abstractions.CapabilityResult property: System.String? ErrorCode { get; init; }
+HoneyDrunk.Capabilities.Abstractions.CapabilityResult property: System.String? ErrorMessage { get; init; }
+HoneyDrunk.Capabilities.Abstractions.CapabilityResult property: System.Text.Json.JsonElement? Output { get; }
+HoneyDrunk.Capabilities.Abstractions.CapabilityResultStatus = enum : System.Int32
+HoneyDrunk.Capabilities.Abstractions.CapabilityResultStatus value: Denied = 2
+HoneyDrunk.Capabilities.Abstractions.CapabilityResultStatus value: Failed = 4
+HoneyDrunk.Capabilities.Abstractions.CapabilityResultStatus value: InvalidArguments = 3
+HoneyDrunk.Capabilities.Abstractions.CapabilityResultStatus value: NotFound = 1
+HoneyDrunk.Capabilities.Abstractions.CapabilityResultStatus value: Succeeded = 0
+HoneyDrunk.Capabilities.Abstractions.ICapabilityGuard = interface
+HoneyDrunk.Capabilities.Abstractions.ICapabilityGuard method: System.Threading.Tasks.Task<HoneyDrunk.Capabilities.Abstractions.CapabilityGuardDecision> AuthorizeAsync(HoneyDrunk.Capabilities.Abstractions.CapabilityDescriptor descriptor, HoneyDrunk.Capabilities.Abstractions.CapabilityCaller caller, System.Threading.CancellationToken cancellationToken = default)
+HoneyDrunk.Capabilities.Abstractions.ICapabilityHandler = interface
+HoneyDrunk.Capabilities.Abstractions.ICapabilityHandler method: System.Threading.Tasks.Task<HoneyDrunk.Capabilities.Abstractions.CapabilityResult> HandleAsync(HoneyDrunk.Capabilities.Abstractions.CapabilityInvocation invocation, System.Threading.CancellationToken cancellationToken)
+HoneyDrunk.Capabilities.Abstractions.ICapabilityInvoker = interface
+HoneyDrunk.Capabilities.Abstractions.ICapabilityInvoker method: System.Threading.Tasks.Task<HoneyDrunk.Capabilities.Abstractions.CapabilityResult> InvokeAsync(HoneyDrunk.Capabilities.Abstractions.CapabilityInvocation invocation, System.Threading.CancellationToken cancellationToken = default)
+HoneyDrunk.Capabilities.Abstractions.ICapabilityRegistry = interface
+HoneyDrunk.Capabilities.Abstractions.ICapabilityRegistry method: HoneyDrunk.Capabilities.Abstractions.CapabilityDescriptor? Resolve(HoneyDrunk.Capabilities.Abstractions.CapabilityKey key)
+HoneyDrunk.Capabilities.Abstractions.ICapabilityRegistry method: System.Collections.Generic.IReadOnlyList<HoneyDrunk.Capabilities.Abstractions.CapabilityDescriptor> List()
+HoneyDrunk.Capabilities.Abstractions.ICapabilityRegistry method: System.Void Register(HoneyDrunk.Capabilities.Abstractions.CapabilityDescriptor descriptor, HoneyDrunk.Capabilities.Abstractions.ICapabilityHandler handler)
