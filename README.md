@@ -2,6 +2,10 @@
 
 The HoneyDrunk Grid's capability registry: how an agent-callable tool is described, registered, found, authorized and run. Tool implementations live in the node that owns them; this repository owns the registry, the descriptor, dispatch and the authorization gate (ADR-0017; see [Decisions](#decisions)).
 
+## SDK requirement
+
+Build and test with the .NET 11 SDK selected by `global.json`. Runtime packages target `net11.0`; consuming applications must also target .NET 11 or later. The contracts-only Abstractions package targets both `net10.0` and `net11.0` to preserve existing contract consumers.
+
 ## Packages
 
 | Package | Use it from | Holds |
